@@ -27,11 +27,8 @@ variables:
 - name: varbackendAzureRmStorageAccountName
   value: ankur01storage01ac01
 
-- name: varWorkingDirectory
-  value: '$(System.DefaultWorkingDirectory)/infra/dev'
-
-- group: Project02-VariableGroup-Dev
-- group: Project02-VariableGroup-Staging
+# - group: Project02-VariableGroup-Dev
+# - group: Project02-VariableGroup-Staging
 
 # Selected values based on parameter: dev or staging
 - name: selected_service_connection
@@ -39,9 +36,13 @@ variables:
 
 - ${{ if eq(parameters.environment, 'dev') }}:
   - group: Project02-VariableGroup-Dev
+  - name: varWorkingDirectory
+    value: '$(System.DefaultWorkingDirectory)/infra/dev'
 
 - ${{ if eq(parameters.environment, 'staging') }}:
   - group: Project02-VariableGroup-Staging
+  - name: varWorkingDirectory
+    value: '$(System.DefaultWorkingDirectory)/infra/staging'
 
 
 stages:
@@ -86,11 +87,11 @@ stages:
         provider: 'azurerm'
         command: 'init'
         workingDirectory: ${{ variables.varWorkingDirectory }}
-        backendServiceArm: 'ServiceConnection-09NOV2025'
-        backendAzureRmResourceGroupName: 'ankurbackend01'
-        backendAzureRmStorageAccountName: 'ankur01storage01ac01'
-        backendAzureRmContainerName: 'ankurstorage01container01'
-        backendAzureRmKey: 'Project02-VG-Dev.terraform.tfstate'
+        backendServiceArm: '$(selected_service_connection)'
+        backendAzureRmResourceGroupName: '$(varbackendAzureRmResourceGroupName)'
+        backendAzureRmStorageAccountName: '$(varbackendAzureRmStorageAccountName)'
+        backendAzureRmContainerName: '$(selectedVG_varbackendAzureRmContainerName)'
+        backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
 
     # # Terraform INIT
     # - task: TerraformTaskV4@4
