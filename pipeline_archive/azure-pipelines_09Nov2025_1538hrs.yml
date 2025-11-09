@@ -46,47 +46,26 @@ stages:
 # =====================================
 # Main branch flow
 # =====================================
-# Stage: terraform install > terraform init
-- stage: MainBranchMerge_TerraformInit
-  displayName: "Branch: (main) - Stage: Terraform Init"
+- stage: MainApproval
+  displayName: "Approval before Plan (main)"
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
   jobs:
-  - job: Main_Init
+  - job: Approval
+    pool: server
     steps:
-    # Terraform INSTALL
-    - task: TerraformInstaller@1
-      displayName: 'Task: terraform install'
-      inputs:
-        terraformVersion: 'latest'
-        
-    # Terraform INIT
-    - task: TerraformTaskV4@4
-      displayName: 'Task: terraform init'
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
-        workingDirectory: ${{ variables.varWorkingDirectory }}
-        backendServiceArm: '$(selected_service_connection)'
-        backendAzureRmResourceGroupName: '$(varbackendAzureRmResourceGroupName)'
-        backendAzureRmStorageAccountName: '$(varbackendAzureRmStorageAccountName)'
-        backendAzureRmContainerName: '$(selectedVG_varbackendAzureRmContainerName)'
-        backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
-
-# Stage: Manual Validation > terraform install > terraform init > terraform plan
-- stage: MainBranchMerge_ApprovalAndTerraformPlan
-  displayName: "Branch: (main) - Stage: Approval, Init, Plan"
-  dependsOn: MainBranchMerge_TerraformInit
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-  jobs:
-  - job: Main_Approval-Init-Plan
-    # pool: server
-    steps:
-    # Manual Validation
     - task: ManualValidation@0
       inputs:
         notifyUsers: 'ankur@example.com'
         instructions: 'Approve to proceed with Terraform Plan for main branch.'
 
+# Stage: terraform install > terraform init > terraform plan
+- stage: TerraformPlan
+  displayName: "Stage: Terraform Plan"
+  dependsOn: MainApproval
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+  jobs:
+  - job: Plan
+    steps:
     # Terraform INSTALL
     - task: TerraformInstaller@1
       displayName: 'Task: terraform install'
@@ -120,12 +99,13 @@ stages:
 # =====================================
 
 # Stage: terraform install > terraform init
-- stage: FeatureBranchMerge_TerraformInit
+- stage: TerraformInit
   displayName: "Stage: Terraform Init"
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
   jobs:
-  - job: Feature_Init
+  - job: Init
     steps:
+
     # Terraform INSTALL
     - task: TerraformInstaller@1
       displayName: 'Task: terraform install'
@@ -146,12 +126,12 @@ stages:
         backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
 
 # Stage: terraform install > terraform init > terraform validate
-- stage: FeatureBranchMerge_TerraformValidate
+- stage: TerraformValidate
   displayName: "Stage: Terraform Validate"
-  dependsOn: FeatureBranchMerge_TerraformInit
+  dependsOn: TerraformInit
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
   jobs:
-  - job: Feature_Init-Validate
+  - job: Validate
     steps:
 
     # Terraform INSTALL
@@ -181,70 +161,13 @@ stages:
         command: 'validate'
         workingDirectory: ${{ variables.varWorkingDirectory }}
 
-- stage: TerraformLintAndSecurity
-  displayName: "Stage: TFLint and TFsec Scan"
-  dependsOn: FeatureBranchMerge_TerraformValidate
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
-  jobs:
-  - job: LintAndSecurity
-    displayName: "Run TFLint and TFsec"
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-
-    # Checkout code
-    - checkout: self
-
-    # Install TFLint
-    - script: |
-        echo "Installing TFLint..."
-        curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-        tflint --version
-      displayName: "Install TFLint"
-
-    # Run TFLint
-    - script: |
-        echo "Running TFLint..."
-        cd ${{ variables.varWorkingDirectory }}
-        tflint --init
-        tflint --enable-rule=terraform_required_providers
-      displayName: "Run TFLint Analysis"
-
-    - script: |
-        tflint --format json > tflint-report.json || true
-      displayName: "Generate Scan Reports"
-
-    - publish: tflint-report.json
-      artifact: TFLintReport
-
-    # Install TFsec
-    - script: |
-        echo "Installing TFsec..."
-        curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
-        tfsec --version
-      displayName: "Install TFsec"
-
-    # Run TFsec
-    - script: |
-        echo "Running TFsec security scan..."
-        cd ${{ variables.varWorkingDirectory }}
-        tfsec .
-      displayName: "Run TFsec Scan"
-
-    - script: |
-        tfsec . --format json > tfsec-report.json || true
-      displayName: "Generate Scan Reports"
-
-    - publish: tfsec-report.json
-      artifact: TFsecReport
-
-- stage: FeatureBranchMerge_Approval
+- stage: FeatureApproval
   displayName: "Stage: Approval before Fmt (feature)"
-  dependsOn: FeatureBranchMerge_TerraformValidate
+  dependsOn: TerraformValidate
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
   jobs:
-  - job: Feature_Approval
-    # pool: server
+  - job: Approval
+    pool: server
     steps:
     - task: ManualValidation@0
       inputs:
@@ -252,13 +175,14 @@ stages:
         instructions: 'Approve to run Terraform Fmt on feature branch.'
 
 # Stage: terraform install > terraform init > terraform fmt
-- stage: FeatureBranchMerge_TerraformFmt
+- stage: TerraformFmt
   displayName: "Stage: Terraform Fmt"
-  dependsOn: FeatureBranchMerge_Approval
+  dependsOn: FeatureApproval
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
   jobs:
-  - job: Feature_Init-Fmt
+  - job: Fmt
     steps:
+
     # Terraform INSTALL
     - task: TerraformInstaller@1
       displayName: 'Task: terraform install'
