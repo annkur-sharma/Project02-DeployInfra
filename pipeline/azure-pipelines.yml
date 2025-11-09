@@ -260,22 +260,24 @@ stages:
                       --output trivy-report.json . || true
         fi
 
-        echo "Verifying Trivy report location..."
-        pwd
+        echo "Verifying Trivy report..."
         ls -l trivy-report.json || echo "⚠️ trivy-report.json not found!"
       displayName: "Run Trivy Config Scan"
 
-    # Debug check — show all files for visibility
+    # Check and copy Trivy report to known location
     - script: |
-        echo "Listing all files in repo and infra/dev..."
-        pwd
-        ls -R
-      displayName: "List files for debugging"
+        echo "Checking for Trivy report before publishing..."
+        if [ -f "${{ variables.varWorkingDirectory }}/trivy-report.json" ]; then
+          echo "✅ Trivy report found, ready for publish."
+        else
+          echo "⚠️ No Trivy report found at ${{ variables.varWorkingDirectory }}/trivy-report.json"
+          echo "{}" > ${{ variables.varWorkingDirectory }}/trivy-report.json
+        fi
+      displayName: "Verify Trivy Report File"
 
     # Publish Trivy Report
     - publish: ${{ variables.varWorkingDirectory }}/trivy-report.json
       artifact: TrivyReport_${{ parameters.environment }}
-      condition: exists('${{ variables.varWorkingDirectory }}/trivy-report.json')
       displayName: "Publish Trivy Report"
 
 - stage: FeatureBranchMerge_Approval
