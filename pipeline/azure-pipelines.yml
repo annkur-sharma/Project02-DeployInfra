@@ -129,7 +129,7 @@ stages:
 
 # Stage: terraform install > terraform init
 - stage: FeatureBranchMerge_TerraformInit
-  displayName: "Stage: Terraform Init"
+  displayName: "Branch: (feature) - Stage: Terraform Init"
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
   jobs:
   - job: Feature_Init
@@ -154,8 +154,8 @@ stages:
         backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
 
 # Stage: terraform install > terraform init > terraform validate
-- stage: FeatureBranchMerge_TerraformValidate
-  displayName: "Stage: Terraform Validate"
+- stage: FeatureBranchMerge_TerraformInitValidate
+  displayName: "Branch: (feature) - Stage: Terraform Init, Validate"
   dependsOn: FeatureBranchMerge_TerraformInit
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
   jobs:
@@ -189,7 +189,7 @@ stages:
         command: 'validate'
         workingDirectory: ${{ variables.varWorkingDirectory }}
 
-- stage: TerraformLintAndSecurity
+- stage: FeatureBranchMerge_TerraformLintAndSecurity
   displayName: "Stage: TFLint and TFsec Scan"
   dependsOn: FeatureBranchMerge_TerraformValidate
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
@@ -210,45 +210,60 @@ stages:
         tflint --version
       displayName: "Install TFLint"
 
-    # Run TFLint
+    # Initialize and Run TFLint
     - script: |
         echo "Running TFLint..."
         cd ${{ variables.varWorkingDirectory }}
         tflint --init
-        tflint --enable-rule=terraform_required_providers
+        # Optional: You can specify config file if you have one, e.g., --config=../.tflint.hcl
+        tflint --recursive --enable-rule=terraform_required_providers
       displayName: "Run TFLint Analysis"
 
+    # Generate JSON Report
     - script: |
-        tflint --format json > tflint-report.json || true
-      displayName: "Generate Scan Reports"
-
-    - publish: tflint-report.json
-      artifact: TFLintReport
-
-    # Install TFsec
-    - script: |
-        echo "Installing TFsec..."
-        curl -sSL https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install_linux.sh | bash
-        tfsec --version
-      displayName: "Install TFsec"
-
-    # Run TFsec
-    - script: |
-        echo "Running TFsec security scan..."
         cd ${{ variables.varWorkingDirectory }}
-        tfsec .
-      displayName: "Run TFsec Scan"
-
-    - script: |
-        tfsec . --format json > tfsec-report.json || true
+        echo "Generating TFLint JSON report..."
+        tflint --format json > ../tflint-report.json || true
       displayName: "Generate Scan Reports"
 
-    - publish: tfsec-report.json
-      artifact: TFsecReport
+    # Publish Report Artifact
+    - publish: tflint-report.json
+      artifact: TFLintReport_${{ parameters.environment }}
+
+    # Install Trivy
+    - script: |
+        echo "Installing Trivy..."
+        sudo apt-get update -y
+        sudo apt-get install -y wget tar
+        wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz
+        tar zxvf trivy_$(uname -s)_$(uname -m).tar.gz
+        sudo mv trivy /usr/local/bin/
+        trivy --version
+      displayName: "Install Trivy"
+
+    # Run Trivy Terraform Security Scan
+    - script: |
+        echo "Running Trivy Terraform security scan..."
+        cd ${{ variables.varWorkingDirectory }}
+        # Check for tfvars file
+        tfvars_file=$(find . -maxdepth 1 -name "*.tfvars" | head -n 1)
+        if [ -n "$tfvars_file" ]; then
+          echo "Using tfvars file: $tfvars_file"
+          trivy config --severity HIGH,CRITICAL --tfvars "$tfvars_file" --format json --output trivy-report.json .
+        else
+          echo "No tfvars file found. Running scan without tfvars..."
+          trivy config --severity HIGH,CRITICAL --format json --output trivy-report.json .
+        fi
+      displayName: "Run Trivy Config Scan"
+
+    # Publish Trivy Report as Artifact
+    - publish: trivy-report.json
+      artifact: TrivyReport_${{ parameters.environment }}
+
 
 - stage: FeatureBranchMerge_Approval
-  displayName: "Stage: Approval before Fmt (feature)"
-  dependsOn: FeatureBranchMerge_TerraformValidate
+  displayName: "Branch: (feature) - Stage: Approval before Fmt (feature)"
+  dependsOn: FeatureBranchMerge_TerraformLintAndSecurity
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
   jobs:
   - job: Feature_Approval
@@ -261,7 +276,7 @@ stages:
 
 # Stage: terraform install > terraform init > terraform fmt
 - stage: FeatureBranchMerge_TerraformFmt
-  displayName: "Stage: Terraform Fmt"
+  displayName: "Branch: (feature) - Stage: Terraform Init, Fmt"
   dependsOn: FeatureBranchMerge_Approval
   condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
   jobs:
