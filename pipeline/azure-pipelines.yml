@@ -67,6 +67,11 @@ stages:
       displayName: 'Task: terraform install'
       inputs:
         terraformVersion: 'latest'
+        
+    - script: |
+        echo "##vso[task.prependpath]/opt/hostedtoolcache/terraform/1.13.5/x64"
+        terraform version
+      displayName: 'Add Terraform to PATH explicitly'
 
     # Terraform INIT
     - task: TerraformTask@5
@@ -208,4 +213,3 @@ stages:
         workingDirectory: '$(selectedVG_varworkingDirectory)'
         environmentServiceNameAzureRM: '$(selected_service_connection)'
 
-        
