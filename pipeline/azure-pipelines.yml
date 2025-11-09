@@ -26,7 +26,7 @@ variables:
 
 - name: varbackendAzureRmStorageAccountName
   value: ankur01storage01ac01
-  
+
 - group: Project02-VariableGroup-Dev
 - group: Project02-VariableGroup-Staging
 
@@ -66,15 +66,15 @@ stages:
   - job: Plan
     steps:
     # Terraform INSTALL
-    - task: TerraformInstaller@1
-      displayName: 'Task: terraform install'
-      inputs:
-        terraformVersion: 'latest'
+    # - task: TerraformInstaller@1
+    #   displayName: 'Task: terraform install'
+    #   inputs:
+    #     terraformVersion: 'latest'
         
-    - script: |
-        echo "##vso[task.prependpath]$(Agent.ToolsDirectory)/terraform/1.13.5/x64"
-        terraform version
-      displayName: 'Add Terraform to PATH explicitly'
+    # - script: |
+    #     echo "##vso[task.prependpath]$(Agent.ToolsDirectory)/terraform/1.13.5/x64"
+    #     terraform version
+    #   displayName: 'Add Terraform to PATH explicitly'
 
     # Terraform INIT
     - task: TerraformTaskV4@4
