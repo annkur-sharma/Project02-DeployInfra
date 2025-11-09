@@ -74,7 +74,7 @@ stages:
     #   displayName: 'Add Terraform to PATH explicitly'
 
     # Terraform INIT
-    - task: TerraformTask@5
+    - task: TerraformTaskV4@4
       displayName: 'Task: terraform init'
       inputs:
         provider: 'azurerm'
@@ -87,7 +87,7 @@ stages:
         backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
 
     # Terraform PLAN
-    - task: TerraformTask@5
+    - task: TerraformTaskV4@4
       displayName: 'Task: terraform plan'
       inputs:
         provider: 'azurerm'
@@ -114,7 +114,7 @@ stages:
     #     terraformVersion: 'latest'
 
     # Terraform INIT
-    - task: TerraformTask@5
+    - task: TerraformTaskV4@4
       displayName: 'Task: terraform init'
       inputs:
         provider: 'azurerm'
@@ -142,7 +142,7 @@ stages:
     #     terraformVersion: 'latest'
 
     # Terraform INIT
-    - task: TerraformTask@5
+    - task: TerraformTaskV4@4
       displayName: 'Task: terraform init'
       inputs:
         provider: 'azurerm'
@@ -155,7 +155,7 @@ stages:
         backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
 
     # Terraform VALIDATE
-    - task: TerraformTask@5
+    - task: TerraformTaskV4@4
       displayName: 'Task: terraform validate'
       inputs:
         provider: 'azurerm'
@@ -191,7 +191,7 @@ stages:
     #     terraformVersion: 'latest'
 
     # Terraform INIT
-    - task: TerraformTask@5
+    - task: TerraformTaskV4@4
       displayName: 'Task: terraform init'
       inputs:
         provider: 'azurerm'
@@ -204,7 +204,7 @@ stages:
         backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
 
     # Terraform FMT
-    - task: TerraformTask@5
+    - task: TerraformTaskV4@4
       displayName: 'Task: terraform fmt'
       inputs:
         provider: 'azurerm'
