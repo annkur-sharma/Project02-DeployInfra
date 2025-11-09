@@ -85,7 +85,7 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'init'
-        workingDirectory: $( variable.varWorkingDirectory )
+        workingDirectory: ${{ variables.varWorkingDirectory }}
         backendServiceArm: 'ServiceConnection-09NOV2025'
         backendAzureRmResourceGroupName: 'ankurbackend01'
         backendAzureRmStorageAccountName: 'ankur01storage01ac01'
