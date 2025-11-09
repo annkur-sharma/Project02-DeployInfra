@@ -108,8 +108,17 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'plan'
-        workingDirectory: '$(selectedVG_varworkingDirectory)'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/infra/dev'
         environmentServiceNameAzureRM: '$(selected_service_connection)'
+
+    # # Terraform PLAN
+    # - task: TerraformTaskV4@4
+    #   displayName: 'Task: terraform plan'
+    #   inputs:
+    #     provider: 'azurerm'
+    #     command: 'plan'
+    #     workingDirectory: '$(selectedVG_varworkingDirectory)'
+    #     environmentServiceNameAzureRM: '$(selected_service_connection)'
 
 # =====================================
 # Feature branch flow
