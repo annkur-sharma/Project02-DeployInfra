@@ -229,7 +229,7 @@ stages:
     - publish: $(System.DefaultWorkingDirectory)/tflint-report.json
       artifact: TFLintReport_${{ parameters.environment }}
 
-    # Install Trivy
+    # Install Trivy (Official APT Method)
     - script: |
         echo "Installing Trivy..."
         sudo apt-get update -y
@@ -241,24 +241,32 @@ stages:
         trivy --version
       displayName: "Install Trivy"
 
-    # Run Trivy Terraform Security Scan
+    # Run Trivy Terraform Config Scan
     - script: |
-        echo "Running Trivy Terraform security scan..."
+        echo "Running Trivy Terraform config scan..."
         cd ${{ variables.varWorkingDirectory }}
+        
+        # Check if any .tfvars file exists
         tfvars_file=$(find . -maxdepth 1 -name "*.tfvars" | head -n 1)
         if [ -n "$tfvars_file" ]; then
           echo "Using tfvars file: $tfvars_file"
-          trivy config --severity HIGH,CRITICAL --tfvars "$tfvars_file" --format json --output $(System.DefaultWorkingDirectory)/trivy-report.json .
+          trivy config --tfvars "$tfvars_file" \
+                       --severity HIGH,CRITICAL \
+                       --format json \
+                       --output ../trivy-report.json .
         else
-          echo "No tfvars file found. Running scan without tfvars..."
-          trivy config --severity HIGH,CRITICAL --format json --output $(System.DefaultWorkingDirectory)/trivy-report.json .
+          echo "No tfvars file found. Running without tfvars..."
+          trivy config --severity HIGH,CRITICAL \
+                       --format json \
+                       --output ../trivy-report.json .
         fi
+
+        echo "Trivy scan complete. JSON report generated."
       displayName: "Run Trivy Config Scan"
 
-    # Publish Trivy Report as Artifact
-    - publish: $(System.DefaultWorkingDirectory)/trivy-report.json
+    # Publish Trivy Report Artifact
+    - publish: trivy-report.json
       artifact: TrivyReport_${{ parameters.environment }}
-
 
 - stage: FeatureBranchMerge_Approval
   displayName: "Branch: (feature) - Stage: Approval before Fmt (feature)"
