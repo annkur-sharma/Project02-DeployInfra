@@ -233,10 +233,11 @@ stages:
     - script: |
         echo "Installing Trivy..."
         sudo apt-get update -y
-        sudo apt-get install -y wget tar
-        wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz
-        tar zxvf trivy_$(uname -s)_$(uname -m).tar.gz
-        sudo mv trivy /usr/local/bin/
+        sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update -y
+        sudo apt-get install -y trivy
         trivy --version
       displayName: "Install Trivy"
 
