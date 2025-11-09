@@ -73,8 +73,8 @@ stages:
         backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
 
 # Stage: Manual Validation > terraform install > terraform init > terraform plan
-- stage: MainBranchMerge_ApprovalAndTerraformPlan
-  displayName: "Branch: (main) - Stage: Approval, Init, Plan"
+- stage: MainBranchMerge_Approval
+  displayName: "Branch: (main) - Stage: Approval"
   dependsOn: MainBranchMerge_TerraformInit
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
   jobs:
@@ -87,6 +87,14 @@ stages:
         notifyUsers: 'ankur@example.com'
         instructions: 'Approve to proceed with Terraform Plan for main branch.'
 
+# Stage: Manual Validation > terraform install > terraform init > terraform plan
+- stage: MainBranchMerge_TerraformInitPlan
+  displayName: "Branch: (main) - Stage: Init, Plan"
+  dependsOn: MainBranchMerge_TerraformInit
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+  jobs:
+  - job: Main_Init_Plan
+    steps:
     # Terraform INSTALL
     - task: TerraformInstaller@1
       displayName: 'Task: terraform install'
