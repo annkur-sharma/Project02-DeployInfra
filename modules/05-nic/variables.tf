@@ -26,12 +26,12 @@ variable "var_child_nic" {
     }))
 
     # Required values for data block of subnet
-    subnet_name          = string
+    subnet_name          = optional(string)
     virtual_network_name = string
-    subnet_key           = string
+    subnet_key           = optional(string)
 
     # Required values for data block of public ip address
-    public_ip_name = string
+    public_ip_name = optional(string)
 
     # Required values for data block of nsg
     nsg_key = optional(string)
@@ -41,14 +41,17 @@ variable "var_child_nic" {
 variable "subnet_ids" {
   description = "Map of subnet names to subnet IDs"
   type        = map(string)
+  default     = {}
 }
 
 variable "public_ip_ids" {
   description = "Map of public IP names to public IP IDs"
   type        = map(string)
+  default     = {}
 }
 
 variable "nsg_ids" {
   description = "Map of NSG Name to NSG IDs"
   type        = map(string)
+  default     = {}
 }

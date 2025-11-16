@@ -32,11 +32,10 @@ steps:
       backendAzureRmContainerName: ${{ parameters.backendContainer }}
       backendAzureRmKey: ${{ parameters.backendKey }}
 
-  # Terraform PLAN
+  # Terraform VALIDATE
   - task: TerraformTaskV4@4
-    displayName: 'Task: terraform plan'
+    displayName: 'Task: terraform validate'
     inputs:
       provider: 'azurerm'
-      command: 'plan'
+      command: 'validate'
       workingDirectory: ${{ parameters.workingDirectory }}
-      environmentServiceNameAzureRM: ${{ parameters.serviceConnection }}

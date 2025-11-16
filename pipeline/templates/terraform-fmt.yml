@@ -32,11 +32,12 @@ steps:
       backendAzureRmContainerName: ${{ parameters.backendContainer }}
       backendAzureRmKey: ${{ parameters.backendKey }}
 
-  # Terraform PLAN
+  # Terraform FMT
   - task: TerraformTaskV4@4
-    displayName: 'Task: terraform plan'
+    displayName: 'Task: terraform fmt'
     inputs:
       provider: 'azurerm'
-      command: 'plan'
+      command: 'custom'
+      customCommand: 'fmt'
       workingDirectory: ${{ parameters.workingDirectory }}
       environmentServiceNameAzureRM: ${{ parameters.serviceConnection }}

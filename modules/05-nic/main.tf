@@ -23,13 +23,15 @@ resource "azurerm_network_interface" "child_nic" {
   dynamic "ip_configuration" {
     for_each = try(each.value.ip_configurations, [])
     content {
-      name                                         = ip_configuration.value.name
-      subnet_id                                    = var.subnet_ids[each.value.subnet_key]
-      private_ip_address_version                   = try(ip_configuration.value.private_ip_address_version, "IPv4")
-      private_ip_address_allocation                = ip_configuration.value.private_ip_address_allocation
-      private_ip_address                           = try(ip_configuration.value.private_ip_address, null)
-      public_ip_address_id                         = try(var.public_ip_ids[each.value.public_ip_name], null)
-      primary                                      = try(ip_configuration.value.primary, false)
+      name                                               = ip_configuration.value.name
+      subnet_id                                          = try(var.subnet_ids[each.value.subnet_key], null)
+      # subnet_id                                          = (contains(keys(var.subnet_ids), each.value.subnet_key) ? var.subnet_ids[each.value.subnet_key] : null)
+      private_ip_address_version                         = try(ip_configuration.value.private_ip_address_version, "IPv4")
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      private_ip_address                                 = try(ip_configuration.value.private_ip_address, null)
+      public_ip_address_id                               = try(var.public_ip_ids[each.value.public_ip_name], null)
+      # public_ip_address_id                               = (contains(keys(var.public_ip_ids), each.value.public_ip_name) ? var.public_ip_ids[each.value.public_ip_name] : null)
+      primary                                            = try(ip_configuration.value.primary, false)
       gateway_load_balancer_frontend_ip_configuration_id = try(ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_id, null)
     }
   }
@@ -40,8 +42,15 @@ resource "azurerm_network_interface" "child_nic" {
 # Network Interface (NIC) & Network Security Group (NSG) association
 # ====================================================================
 resource "azurerm_network_interface_security_group_association" "example" {
-  for_each = var.var_child_nic
+    # Only NICs with a valid NSG key will have this association
+  for_each = {
+    for k, v in var.var_child_nic : k => v
+    if (
+      try(v.nsg_key, null) != null &&
+      contains(keys(var.nsg_ids), v.nsg_key)
+    )
+  }
 
   network_interface_id      = azurerm_network_interface.child_nic[each.key].id
-  network_security_group_id = try(var.nsg_ids[each.value.nsg_key], null)
+  network_security_group_id = var.nsg_ids[each.value.nsg_key]
 }
