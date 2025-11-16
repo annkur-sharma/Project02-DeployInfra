@@ -86,33 +86,15 @@ stages:
   jobs:
   - job: Main_Init_Plan
     steps:
-    # Terraform INSTALL
-    - task: TerraformInstaller@1
-      displayName: 'Task: terraform install'
-      inputs:
-        terraformVersion: 'latest'
-        
-    # Terraform INIT
-    - task: TerraformTaskV4@4
-      displayName: 'Task: terraform init'
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
+    # TEMPLATE --> Terraform INSTALL & INIT & PLAN
+    - template: templates/terraform-plan.yml
+      parameters:
         workingDirectory: ${{ variables.varWorkingDirectory }}
-        backendServiceArm: '$(selected_service_connection)'
-        backendAzureRmResourceGroupName: '$(varbackendAzureRmResourceGroupName)'
-        backendAzureRmStorageAccountName: '$(varbackendAzureRmStorageAccountName)'
-        backendAzureRmContainerName: '$(selectedVG_varbackendAzureRmContainerName)'
-        backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
-
-    # Terraform PLAN
-    - task: TerraformTaskV4@4
-      displayName: 'Task: terraform plan'
-      inputs:
-        provider: 'azurerm'
-        command: 'plan'
-        workingDirectory: ${{ variables.varWorkingDirectory }}
-        environmentServiceNameAzureRM: '$(selected_service_connection)'
+        serviceConnection: ${{ variables.varServiceConnection }}
+        backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
+        backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
+        backendContainer: ${{ variables.selectedVG_varbackendAzureRmContainerName }}
+        backendKey: ${{ variables.selectedVG_varbackendAzureRmKey }}
 
 # =====================================
 # Feature branch flow
@@ -125,24 +107,15 @@ stages:
   jobs:
   - job: Feature_Init
     steps:
-    # Terraform INSTALL
-    - task: TerraformInstaller@1
-      displayName: 'Task: terraform install'
-      inputs:
-        terraformVersion: 'latest'
-
-    # Terraform INIT
-    - task: TerraformTaskV4@4
-      displayName: 'Task: terraform init'
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
+    # TEMPLATE --> Terraform INSTALL & INIT
+    - template: templates/terraform-init.yml
+      parameters:
         workingDirectory: ${{ variables.varWorkingDirectory }}
-        backendServiceArm: '$(selected_service_connection)'
-        backendAzureRmResourceGroupName: '$(varbackendAzureRmResourceGroupName)'
-        backendAzureRmStorageAccountName: '$(varbackendAzureRmStorageAccountName)'
-        backendAzureRmContainerName: '$(selectedVG_varbackendAzureRmContainerName)'
-        backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
+        serviceConnection: ${{ variables.varServiceConnection }}
+        backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
+        backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
+        backendContainer: ${{ variables.selectedVG_varbackendAzureRmContainerName }}
+        backendKey: ${{ variables.selectedVG_varbackendAzureRmKey }}
 
 # Stage: terraform install > terraform init > terraform validate
 - stage: FeatureBranchMerge_TerraformInitValidate
@@ -153,32 +126,15 @@ stages:
   - job: Feature_Init_Validate
     steps:
 
-    # Terraform INSTALL
-    - task: TerraformInstaller@1
-      displayName: 'Task: terraform install'
-      inputs:
-        terraformVersion: 'latest'
-
-    # Terraform INIT
-    - task: TerraformTaskV4@4
-      displayName: 'Task: terraform init'
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
+    # TEMPLATE --> Terraform INSTALL & INIT & VALIDATE
+    - template: templates/terraform-validate.yml
+      parameters:
         workingDirectory: ${{ variables.varWorkingDirectory }}
-        backendServiceArm: '$(selected_service_connection)'
-        backendAzureRmResourceGroupName: '$(varbackendAzureRmResourceGroupName)'
-        backendAzureRmStorageAccountName: '$(varbackendAzureRmStorageAccountName)'
-        backendAzureRmContainerName: '$(selectedVG_varbackendAzureRmContainerName)'
-        backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
-
-    # Terraform VALIDATE
-    - task: TerraformTaskV4@4
-      displayName: 'Task: terraform validate'
-      inputs:
-        provider: 'azurerm'
-        command: 'validate'
-        workingDirectory: ${{ variables.varWorkingDirectory }}
+        serviceConnection: ${{ variables.varServiceConnection }}
+        backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
+        backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
+        backendContainer: ${{ variables.selectedVG_varbackendAzureRmContainerName }}
+        backendKey: ${{ variables.selectedVG_varbackendAzureRmKey }}
 
 - stage: FeatureBranchMerge_TerraformLintAndSecurity
   displayName: "Stage: TFLint and TFsec Scan"
@@ -292,32 +248,13 @@ stages:
   jobs:
   - job: Feature_Init_Fmt
     steps:
-    # Terraform INSTALL
-    - task: TerraformInstaller@1
-      displayName: 'Task: terraform install'
-      inputs:
-        terraformVersion: 'latest'
-
-    # Terraform INIT
-    - task: TerraformTaskV4@4
-      displayName: 'Task: terraform init'
-      inputs:
-        provider: 'azurerm'
-        command: 'init'
+    # TEMPLATE --> Terraform INSTALL & INIT & FMT
+    - template: templates/terraform-fmt.yml
+      parameters:
         workingDirectory: ${{ variables.varWorkingDirectory }}
-        backendServiceArm: '$(selected_service_connection)'
-        backendAzureRmResourceGroupName: '$(varbackendAzureRmResourceGroupName)'
-        backendAzureRmStorageAccountName: '$(varbackendAzureRmStorageAccountName)'
-        backendAzureRmContainerName: '$(selectedVG_varbackendAzureRmContainerName)'
-        backendAzureRmKey: '$(selectedVG_varbackendAzureRmKey)'
-
-    # Terraform FMT
-    - task: TerraformTaskV4@4
-      displayName: 'Task: terraform fmt'
-      inputs:
-        provider: 'azurerm'
-        command: 'custom'
-        customCommand: 'fmt'
-        workingDirectory: ${{ variables.varWorkingDirectory }}
-        environmentServiceNameAzureRM: '$(selected_service_connection)'
+        serviceConnection: ${{ variables.varServiceConnection }}
+        backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
+        backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
+        backendContainer: ${{ variables.selectedVG_varbackendAzureRmContainerName }}
+        backendKey: ${{ variables.selectedVG_varbackendAzureRmKey }}
 

@@ -13,11 +13,13 @@ parameters:
     type: string
 
 steps:
+  # Terraform INSTALL
   - task: TerraformInstaller@1
     displayName: "Install Terraform"
     inputs:
       terraformVersion: "latest"
 
+  # Terraform INIT
   - task: TerraformTaskV4@4
     displayName: "Terraform Init"
     inputs:
