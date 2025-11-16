@@ -22,11 +22,21 @@ output "out_root_nsg_names" {
   value = module.module_nsg.out_child_nsg_names
 }
 
-output "out_root_public_ip_details" {
-  description = "Map of public IP names to their IDs"
-  value = module.module_public_ip.out_child_public_ip_details
-}
+# output "out_root_public_ip_details" {
+#   description = "Map of public IP names to their IDs"
+#   value = module.module_public_ip.out_child_public_ip_details
+# }
 
 output "out_root_nsg_name_ids" {
   value = module.module_nsg.out_child_nsg_name_ids
+}
+
+
+
+output "out_root_public_ip_to_id" {
+  value = module.module_bastion_host_public_ip.out_child_public_ip_names_to_ips
+}
+
+output "out_root_loadbalancer_name_ip" {
+  value = module.module_loadbalancer.out_child_loadbalancer_name_ip
 }

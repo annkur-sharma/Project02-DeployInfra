@@ -27,13 +27,15 @@ resource "azurerm_linux_virtual_machine" "child_vm" {
     version   = each.value.image.version
   }
 
-#   admin_ssh_key {
-#     username   = each.value.admin_username
-#     public_key = try(each.value.ssh_public_key, null)
-#   }
+  custom_data = try(base64encode(file(each.value.child_custom_data_file)), null)
 
-  computer_name = each.value.computer_name
-  provision_vm_agent = true
+  #   admin_ssh_key {
+  #     username   = each.value.admin_username
+  #     public_key = try(each.value.ssh_public_key, null)
+  #   }
+
+  computer_name              = each.value.computer_name
+  provision_vm_agent         = true
   allow_extension_operations = true
 
   boot_diagnostics {
@@ -41,5 +43,5 @@ resource "azurerm_linux_virtual_machine" "child_vm" {
   }
 
   tags = try(each.value.tags, {})
-  
+
 }
