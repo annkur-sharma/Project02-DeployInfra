@@ -267,7 +267,9 @@ var_root_dev_nic_private_ip = {
     name                = "eagle-nic2-backend"
     location            = "francecentral"
     resource_group_name = "eagle-rg1"
-
+    accelerated_networking_enabled = false
+    ip_forwarding_enabled          = false
+    
     tags = {
       env      = "dev"
       resource = "nic"
