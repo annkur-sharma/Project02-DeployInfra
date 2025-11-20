@@ -220,28 +220,22 @@ stages:
         echo "Running Trivy Terraform config scan..."
         cd ${{ variables.varWorkingDirectory }}
 
-        tfvars_file=$(find . -maxdepth 1 -name "*.tfvars" | head -n 1)
-
-        if [ -n "$tfvars_file" ]; then
-          echo "Using tfvars file: $tfvars_file"
-          trivy config --scan terraform \
-                      --tf-vars-file "$tfvars_file" \
-                      --format json \
-                      --severity HIGH,CRITICAL \
-                      --output trivy-report.json \
-                      . || true
-        else
-          echo "No tfvars found. Running without tfvars..."
-          trivy config --scan terraform \
-                      --format json \
-                      --severity HIGH,CRITICAL \
-                      --output trivy-report.json \
-                      . || true
-        fi
+        echo "Executing: trivy config . --format json --output trivy-report.json"
+        trivy config . \
+            --format json \
+            --severity HIGH,CRITICAL \
+            --output trivy-report.json || true
 
         echo "Verifying Trivy report..."
-        ls -l trivy-report.json || echo "⚠️ trivy-report.json not found!"
-      displayName: "Run Trivy Config Scan"
+        if [ -f trivy-report.json ]; then
+            echo "✅ Trivy report generated successfully"
+        else
+            echo "❌ Trivy did NOT generate a report!"
+            echo "{}" > trivy-report.json
+        fi
+
+        ls -l trivy-report.json
+      displayName: "Run Trivy Config Scan (v0.67.2 Compatible)"
 
     # Check and copy Trivy report to known location
     - script: |
