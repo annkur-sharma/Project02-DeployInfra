@@ -223,15 +223,15 @@ stages:
         tfvars_file=$(find . -maxdepth 1 -name "*.tfvars" | head -n 1)
         if [ -n "$tfvars_file" ]; then
           echo "Using tfvars file: $tfvars_file"
-          trivy config --tfvars "$tfvars_file" \
+          trivy config . --tfvars "$tfvars_file" \
                       --severity HIGH,CRITICAL \
                       --format json \
-                      --output trivy-report.json . || true
+                      --output trivy-report.json || true
         else
           echo "No tfvars file found. Running without tfvars..."
-          trivy config --severity HIGH,CRITICAL \
+          trivy config . --severity HIGH,CRITICAL \
                       --format json \
-                      --output trivy-report.json . || true
+                      --output trivy-report.json || true
         fi
 
         echo "Verifying Trivy report..."
@@ -268,8 +268,8 @@ stages:
         echo "📄 Parsing Trivy JSON..."
 
         # Extract HIGH and CRITICAL counts
-        HIGH_COUNT=$(jq '[.Results[].Misconfigurations[]? | select(.Severity=="HIGH")] | length' "$REPORT")
-        CRITICAL_COUNT=$(jq '[.Results[].Misconfigurations[]? | select(.Severity=="CRITICAL")] | length' "$REPORT")
+        HIGH_COUNT=$(jq -r '[.Results?[]?.Misconfigurations?[]? | select(.Severity=="HIGH")] | length' "$REPORT")
+        CRITICAL_COUNT=$(jq -r '[.Results?[]?.Misconfigurations?[]? | select(.Severity=="CRITICAL")] | length' "$REPORT")
 
         echo "🟥 HIGH issues: $HIGH_COUNT"
         echo "🟥 CRITICAL issues: $CRITICAL_COUNT"
