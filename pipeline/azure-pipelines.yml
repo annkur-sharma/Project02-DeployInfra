@@ -162,7 +162,7 @@ stages:
         echo "Running TFLint..."
         cd ${{ variables.varWorkingDirectory }}
         tflint --init
-        tflint --recursive --enable-rule=terraform_required_providers
+        tflint --recursive --enable-rule=terraform_required_providers --force
       displayName: "Run TFLint Analysis"
 
     # Generate JSON Report
