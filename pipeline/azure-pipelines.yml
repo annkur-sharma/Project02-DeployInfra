@@ -60,8 +60,8 @@ stages:
         serviceConnection: ${{ variables.varServiceConnection }}
         backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
         backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
-        backendContainer: ${{ variables.selectedVG_varbackendAzureRmContainerName }}
-        backendKey: ${{ variables.selectedVG_varbackendAzureRmKey }}
+        backendContainer: $(selectedVG_varbackendAzureRmContainerName)
+        backendKey: $(selectedVG_varbackendAzureRmKey)
 
 # Stage: Manual Validation > terraform install > terraform init > terraform plan
 - stage: MainBranchMerge_Approval
@@ -93,8 +93,8 @@ stages:
         serviceConnection: ${{ variables.varServiceConnection }}
         backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
         backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
-        backendContainer: ${{ variables.selectedVG_varbackendAzureRmContainerName }}
-        backendKey: ${{ variables.selectedVG_varbackendAzureRmKey }}
+        backendContainer: $(selectedVG_varbackendAzureRmContainerName)
+        backendKey: $(selectedVG_varbackendAzureRmKey)
 
 # =====================================
 # Feature branch flow
@@ -114,8 +114,8 @@ stages:
         serviceConnection: ${{ variables.varServiceConnection }}
         backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
         backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
-        backendContainer: ${{ variables.selectedVG_varbackendAzureRmContainerName }}
-        backendKey: ${{ variables.selectedVG_varbackendAzureRmKey }}
+        backendContainer: $(selectedVG_varbackendAzureRmContainerName)
+        backendKey: $(selectedVG_varbackendAzureRmKey)
 
 # Stage: terraform install > terraform init > terraform validate
 - stage: FeatureBranchMerge_TerraformInitValidate
@@ -133,8 +133,8 @@ stages:
         serviceConnection: ${{ variables.varServiceConnection }}
         backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
         backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
-        backendContainer: ${{ variables.selectedVG_varbackendAzureRmContainerName }}
-        backendKey: ${{ variables.selectedVG_varbackendAzureRmKey }}
+        backendContainer: $(selectedVG_varbackendAzureRmContainerName)
+        backendKey: $(selectedVG_varbackendAzureRmKey)
 
 - stage: FeatureBranchMerge_TerraformLintAndSecurity
   displayName: "Stage: TFLint and TFsec Scan"
@@ -312,6 +312,6 @@ stages:
         serviceConnection: ${{ variables.varServiceConnection }}
         backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
         backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
-        backendContainer: ${{ variables.selectedVG_varbackendAzureRmContainerName }}
-        backendKey: ${{ variables.selectedVG_varbackendAzureRmKey }}
+        backendContainer: $(selectedVG_varbackendAzureRmContainerName)
+        backendKey: $(selectedVG_varbackendAzureRmKey)
 
