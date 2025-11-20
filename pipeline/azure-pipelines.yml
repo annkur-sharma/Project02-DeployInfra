@@ -237,6 +237,7 @@ stages:
         ls -l trivy-report.json
       displayName: "Run Trivy Config Scan (v0.67.2 Compatible)"
 
+
     # Check and copy Trivy report to known location
     - script: |
         echo "Checking for Trivy report before publishing..."
