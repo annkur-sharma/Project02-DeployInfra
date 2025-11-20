@@ -256,7 +256,7 @@ stages:
 
     # Fail pipeline if Trivy finds more than 1 HIGH or CRITICAL issue
     - script: |
-        echo "🔍 Checking Trivy report for HIGH/CRITICAL issues..."
+        echo "🔍 Checking Trivy report for misconfigurations..."
 
         REPORT="${{ variables.varWorkingDirectory }}/trivy-report.json"
 
@@ -267,21 +267,18 @@ stages:
 
         echo "📄 Parsing Trivy JSON..."
 
-        # Extract HIGH and CRITICAL counts
-        HIGH_COUNT=$(jq -r '[.Results?[]?.Misconfigurations?[]? | select(.Severity=="HIGH")] | length' "$REPORT")
-        CRITICAL_COUNT=$(jq -r '[.Results?[]?.Misconfigurations?[]? | select(.Severity=="CRITICAL")] | length' "$REPORT")
+        FAILURES=$(jq -r '.Results[].MisconfSummary.Failures' "$REPORT")
 
-        echo "🟥 HIGH issues: $HIGH_COUNT"
-        echo "🟥 CRITICAL issues: $CRITICAL_COUNT"
+        echo "🟥 Total Failures: $FAILURES"
 
-        # Total logic: Fail if more than 1 HIGH or more than 1 CRITICAL
-        if [ "$HIGH_COUNT" -gt 1 ] || [ "$CRITICAL_COUNT" -gt 1 ]; then
-          echo "❌ Pipeline FAILED — Trivy detected HIGH/CRITICAL issues above allowed threshold."
+        # Fail pipeline if FAILURES > 1
+        if [ "$FAILURES" -gt 1 ]; then
+          echo "❌ Pipeline FAILED — More than 1 Trivy failure detected."
           exit 1
         fi
 
-        echo "✅ Trivy scan within allowed thresholds. Continuing..."
-      displayName: "❌ Fail Pipeline if Trivy HIGH/CRITICAL Findings > 1"
+        echo "✅ Trivy scan passed within allowed thresholds."
+      displayName: "❌ Fail Pipeline if Trivy Failures > 1"
       condition: succeededOrFailed()
 
 - stage: FeatureBranchMerge_Approval
