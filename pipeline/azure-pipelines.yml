@@ -312,3 +312,21 @@ stages:
         backendContainer: $(selectedVG_varbackendAzureRmContainerName)
         backendKey: $(selectedVG_varbackendAzureRmKey)
 
+# Stage: terraform install > terraform init > terraform apply
+- stage: FeatureBranchMerge_TerraformInitApply
+  displayName: "Branch: (feature) - Stage: Terraform Init, Apply"
+  dependsOn: FeatureBranchMerge_TerraformInit
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
+  jobs:
+  - job: Feature_Init_Apply
+    steps:
+
+    # TEMPLATE --> Terraform INSTALL & INIT & APPLY
+    - template: templates/terraform-apply.yml
+      parameters:
+        workingDirectory: ${{ variables.varWorkingDirectory }}
+        serviceConnection: ${{ variables.varServiceConnection }}
+        backendRg: ${{ variables.varbackendAzureRmResourceGroupName }}
+        backendStorage: ${{ variables.varbackendAzureRmStorageAccountName }}
+        backendContainer: $(selectedVG_varbackendAzureRmContainerName)
+        backendKey: $(selectedVG_varbackendAzureRmKey)
