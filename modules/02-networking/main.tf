@@ -63,7 +63,7 @@ resource "azurerm_subnet" "child_subnet" {
   default_outbound_access_enabled               = try(each.value.default_outbound_access_enabled, true)
   private_endpoint_network_policies             = try(each.value.private_endpoint_network_policies, null)
   private_link_service_network_policies_enabled = try(each.value.private_link_service_network_policies_enabled, true)
-  sharing_scope                                 = try(each.value.sharing_scope, null)
+  # sharing_scope                                 = try(each.value.sharing_scope, null)
   service_endpoints                             = try(each.value.service_endpoints, null)
   service_endpoint_policy_ids                   = try(each.value.service_endpoint_policy_ids, null)
 

@@ -96,55 +96,6 @@ stages:
         backendContainer: $(selectedVG_varbackendAzureRmContainerName)
         backendKey: $(selectedVG_varbackendAzureRmKey)
 
-    # Install Infracost
-    - script: |
-        echo "Installing Infracost..."
-        curl -fsSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh
-
-        echo "Configuring API Key..."
-        infracost configure set api_key $(INFRACOST_API_KEY)
-
-        infracost --version
-      displayName: "Install & Configure Infracost"
-
-    # Run Infracost Breakdown
-    - script: |
-        echo "Running Infracost breakdown..."
-        cd ${{ variables.varWorkingDirectory }}
-
-        echo "Executing: infracost breakdown --path=. --format json --out-file infracost-report.json"
-        infracost breakdown \
-            --path . \
-            --format json \
-            --out-file infracost-report.json || true
-
-        echo "Verifying Infracost report..."
-        if [ -f infracost-report.json ]; then
-          echo "✅ Infracost report generated successfully"
-        else
-          echo "❌ Infracost did NOT generate a report!"
-          echo "{}" > infracost-report.json
-        fi
-
-        ls -l infracost-report.json
-      displayName: "Run Infracost Cost Breakdown"
-
-    # Check and Copy Infracost Report
-    - script: |
-        echo "Checking for Infracost report before publishing..."
-        if [ -f "${{ variables.varWorkingDirectory }}/infracost-report.json" ]; then
-          echo "✅ Infracost report found, ready for publish."
-        else
-          echo "⚠️ No Infracost report found at ${{ variables.varWorkingDirectory }}/infracost-report.json"
-          echo "{}" > ${{ variables.varWorkingDirectory }}/infracost-report.json
-        fi
-      displayName: "Verify Infracost Report File"
-
-    # Publish Infracost Report (same pattern as Trivy)
-    - publish: ${{ variables.varWorkingDirectory }}/infracost-report.json
-      artifact: InfracostReport_${{ parameters.environment }}
-      displayName: "Publish Infracost Report"
-
 # =====================================
 # Feature branch flow
 # =====================================
