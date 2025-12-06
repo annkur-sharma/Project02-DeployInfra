@@ -1,40 +1,72 @@
-variable "var_root_dev_resource_group" {}
+variable "var_root_dev_resource_group" {
+    type = map(any)
+}
 
 # "Map of Virtual Network, Subnet, Public IP"
-variable "var_root_dev_vnet" {}
+variable "var_root_dev_vnet"  {
+    type = map(any)
+}
 
 # "Subnet definitions for each VNet"
-variable "var_root_dev_subnet" {}
+variable "var_root_dev_subnet"  {
+    type = map(any)
+}
 
 # Public IP resource
-variable "var_root_dev_public_ip" {}
+variable "var_root_dev_public_ip"  {
+    type = map(any)
+}
 
 # "Map of Network Security Groups to create with optional security rules."
-variable "var_root_dev_nsg" {}
+variable "var_root_dev_nsg"  {
+    type = map(any)
+}
 
 # "Map of virtual machines with configuration"
-variable "var_root_dev_vms" {}
+variable "var_root_dev_vms"  {
+    type = map(any)
+}
 
-variable "var_root_dev_sql_server" {}
+variable "var_root_dev_sql_server"  {
+    type = map(any)
+}
 
 # "Map of MSSQL Databases to be created"
-variable "var_root_dev_mssql_databases" {}
+variable "var_root_dev_mssql_databases"  {
+    type = map(any)
+}
 
 # "Map of Bastion Hosts with configuration details"
-variable "var_root_dev_bastion" {}
+variable "var_root_dev_bastion"  {
+    type = map(any)
+}
 
-variable "var_root_dev_subnet_bastion" {}
+variable "var_root_dev_subnet_bastion"  {
+    type = map(any)
+}
 
-variable "var_root_dev_public_ip_bastion" {}
+variable "var_root_dev_public_ip_bastion"  {
+    type = map(any)
+}
 
-variable "var_root_dev_public_ip_loadbalancer" {}
+variable "var_root_dev_public_ip_loadbalancer"  {
+    type = map(any)
+}
 
-variable "var_root_dev_nic_private_ip_loadbalancer" {}
+variable "var_root_dev_nic_private_ip_loadbalancer"  {
+    type = map(any)
+}
 
 # "Map of Network Interfaces with their IP configuration details."
-variable "var_root_dev_nic_private_ip" {}
+variable "var_root_dev_nic_private_ip"  {
+    type = map(any)
+}
 
 # Load Balancer
-variable "var_root_dev_loadbalancer" {}
+variable "var_root_dev_loadbalancer"  {
+    type = map(any)
+}
 
-variable "var_root_dev_nic_lb_backend_association" {}
+variable "var_root_dev_nic_lb_backend_association"  {
+    type = map(any)
+}
